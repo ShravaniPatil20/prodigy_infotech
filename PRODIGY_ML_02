@@ -1,0 +1,45 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+
+# Generate some example data (replace this with your actual dataset)
+np.random.seed(42)
+num_customers = 200
+purchase_history = np.random.randint(1, 100, size=(num_customers, 5))
+
+# Create a DataFrame with the generated data
+columns = ['Product_1', 'Product_2', 'Product_3', 'Product_4', 'Product_5']
+data = pd.DataFrame(purchase_history, columns=columns)
+
+# Standardize the data to have zero mean and unit variance
+scaler = StandardScaler()
+scaled_data = scaler.fit_transform(data)
+
+# Determine the optimal number of clusters (K) using the elbow method
+wcss = []
+for i in range(1, 11):
+    kmeans = KMeans(n_clusters=i, init='k-means++', max_iter=300, n_init=10, random_state=42)
+    kmeans.fit(scaled_data)
+    wcss.append(kmeans.inertia_)
+
+# Plot the elbow method to find the optimal K
+plt.plot(range(1, 11), wcss)
+plt.title('Elbow Method for Optimal K')
+plt.xlabel('Number of Clusters (K)')
+plt.ylabel('Within-Cluster Sum of Squares (WCSS)')
+plt.show()
+
+# Choose the optimal K based on the elbow method (in this example, let's say K=3)
+optimal_k = 3
+
+# Apply K-means clustering with the chosen K
+kmeans = KMeans(n_clusters=optimal_k, init='k-means++', max_iter=300, n_init=10, random_state=42)
+clusters = kmeans.fit_predict(scaled_data)
+
+# Add the cluster labels to the original DataFrame
+data['Cluster'] = clusters
+
+# Display the results
+print(data.head())
